@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Job Scheduler logo">
+  <rect width="64" height="64" rx="16" fill="#07111f"/>
+  <path d="M18 18h28v10H18z" fill="#2dd4bf"/>
+  <path d="M18 36h20v10H18z" fill="#60a5fa"/>
+  <path d="M40 36h6v10h-6z" fill="#f59e0b"/>
+  <circle cx="46" cy="23" r="6" fill="#f8fafc"/>
+</svg>
