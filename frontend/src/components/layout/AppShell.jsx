@@ -72,8 +72,8 @@ export function AppShell() {
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden rounded-xl border border-line bg-panel px-3 py-2 text-right text-sm md:block">
-                <div className="font-medium text-ink">{user?.email}</div>
-                <div className="text-steel">{user?.roles?.join(', ')}</div>
+                <div className="font-semibold text-accent">{user?.name || 'User'}</div>
+                <div className="text-steel">{user?.roles?.join(', ') || 'No roles'}</div>
               </div>
               <Button variant="secondary" onClick={logout}><LogOut className="h-4 w-4" />Logout</Button>
             </div>
