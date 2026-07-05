@@ -14,13 +14,10 @@ async function addIndex(queryInterface, table, fields, options = {}) {
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Check if user_roles table exists and has old structure, drop it
+    // Drop user_roles table if it exists to avoid migration conflicts
     const tableExists = await queryInterface.tableExists('user_roles');
     if (tableExists) {
-      const tableDescription = await queryInterface.describeTable('user_roles');
-      if (!tableDescription.id) {
-        await queryInterface.dropTable('user_roles');
-      }
+      await queryInterface.dropTable('user_roles');
     }
 
     await queryInterface.createTable('users', {
