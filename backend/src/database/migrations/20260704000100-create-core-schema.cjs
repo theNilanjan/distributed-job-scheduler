@@ -14,6 +14,15 @@ async function addIndex(queryInterface, table, fields, options = {}) {
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // Check if user_roles table exists and has old structure, drop it
+    const tableExists = await queryInterface.tableExists('user_roles');
+    if (tableExists) {
+      const tableDescription = await queryInterface.describeTable('user_roles');
+      if (!tableDescription.id) {
+        await queryInterface.dropTable('user_roles');
+      }
+    }
+
     await queryInterface.createTable('users', {
       id,
       name: { type: Sequelize.STRING(120), allowNull: false },
@@ -31,10 +40,12 @@ module.exports = {
     });
 
     await queryInterface.createTable('user_roles', {
+      id,
       user_id: { ...fk, references: { model: 'users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE' },
       role_id: { ...fk, references: { model: 'roles', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE' }
     });
     await addIndex(queryInterface, 'user_roles', ['user_id', 'role_id'], { unique: true, name: 'ux_user_roles_user_role' });
+    await addIndex(queryInterface, 'user_roles', ['role_id'], { name: 'role_id' });
 
     await queryInterface.createTable('organizations', {
       id,
