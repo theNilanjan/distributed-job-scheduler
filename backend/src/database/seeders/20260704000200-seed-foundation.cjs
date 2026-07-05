@@ -24,7 +24,7 @@ module.exports = {
       updated_at: now
     }]);
 
-    await queryInterface.bulkInsert('user_roles', [{ user_id: 1, role_id: 1 }]);
+    await queryInterface.bulkInsert('user_roles', [{ id: 1, user_id: 1, role_id: 1 }]);
 
     await queryInterface.bulkInsert('organizations', [{
       id: 1,
