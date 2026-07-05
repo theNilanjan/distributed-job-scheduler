@@ -9,7 +9,7 @@ import { paginatedResponse } from '../utils/pagination.js';
 import { emitSystemEvent } from '../socket/index.js';
 import { logger } from '../utils/logger.js';
 
-export async function listWorkers(query) {
+export async function listWorkers(user, query) {
   const options = buildListOptions(query, ['name', 'hostname'], ['createdAt', 'name', 'lastHeartbeatAt']);
   applyExactFilters(options.where, query, ['status']);
   return paginatedResponse(await models.Worker.findAndCountAll(options), options);

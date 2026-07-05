@@ -2,7 +2,7 @@ import * as service from '../services/worker.service.js';
 import { asyncHandler } from '../middlewares/asyncHandler.js';
 import { created, success } from '../utils/response.js';
 
-export const list = asyncHandler(async (req, res) => success(res, await service.listWorkers(req.query)));
+export const list = asyncHandler(async (req, res) => success(res, await service.listWorkers(req.user, req.query)));
 export const register = asyncHandler(async (req, res) => created(res, await service.registerWorker(req.body)));
 export const heartbeat = asyncHandler(async (req, res) => success(res, await service.heartbeat(req.params.id, req.body)));
 export const claim = asyncHandler(async (req, res) => success(res, await service.claimJobs(req.body)));

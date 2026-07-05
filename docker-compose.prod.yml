@@ -1,0 +1,70 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: job-scheduler-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5010
+      WORKER_PORT: 5001
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      API_BASE_URL: ${API_BASE_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "${BACKEND_PORT:-5010}:5010"
+    command: sh -c "npm run db:migrate && node src/server.js"
+    restart: unless-stopped
+    networks:
+      - job-scheduler-network
+
+  worker:
+    build:
+      context: ./backend
+    container_name: job-scheduler-worker
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-5}
+      WORKER_POLL_INTERVAL_MS: ${WORKER_POLL_INTERVAL_MS:-2000}
+    command: sh -c "node src/worker/start.js"
+    networks:
+      - job-scheduler-network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-}
+    container_name: job-scheduler-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL:-}
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    restart: unless-stopped
+    networks:
+      - job-scheduler-network
+
+networks:
+  job-scheduler-network:
+    driver: bridge

@@ -18,7 +18,7 @@ export async function authenticate(req, _res, next) {
     req.user = {
       id: user.id,
       email: user.email,
-      roles: user.roles.map((role) => role.name)
+      roles: user.roles ? user.roles.map((role) => role.name) : []
     };
     next();
   } catch (error) {

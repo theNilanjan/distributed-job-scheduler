@@ -7,7 +7,7 @@ import { paginatedResponse } from '../utils/pagination.js';
 export async function listProjects(user, query) {
   const options = buildListOptions(query, ['name', 'key'], ['createdAt', 'name', 'key']);
   applyExactFilters(options.where, query, ['organizationId', 'status']);
-  if (!hasPlatformRole(user) && !query.organizationId) {
+  if (!hasPlatformRole(user)) {
     const memberships = await models.ProjectMember.findAll({ where: { userId: user.id }, attributes: ['projectId'] });
     options.where.id = memberships.map((membership) => membership.projectId);
   }

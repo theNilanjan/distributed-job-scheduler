@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const path = require('path');
+
 const base = {
   username: process.env.DB_USER || 'jobscheduler',
   password: process.env.DB_PASSWORD || 'jobscheduler_password',
@@ -10,7 +12,9 @@ const base = {
   timezone: '+00:00',
   migrationStorageTableName: 'sequelize_meta',
   seederStorage: 'sequelize',
-  seederStorageTableName: 'sequelize_seed_meta'
+  seederStorageTableName: 'sequelize_seed_meta',
+  migrationsPath: path.join(__dirname, '../database/migrations'),
+  seedersPath: path.join(__dirname, '../database/seeders')
 };
 
 module.exports = {

@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { Op } from 'sequelize';
 import { models, sequelize } from '../models/index.js';
-import { assertQueueAccess } from './access.service.js';
+import { assertQueueAccess, hasPlatformRole } from './access.service.js';
 import { calculateRetryDelay } from './retryPolicy.service.js';
 import { badRequest, notFound } from '../utils/httpError.js';
 import { applyExactFilters, buildListOptions } from '../utils/query.js';
@@ -34,6 +34,12 @@ function resolveSchedule(payload) {
 export async function listJobs(user, query) {
   const options = buildListOptions(query, ['name', 'batchId', 'idempotencyKey'], ['createdAt', 'priority', 'runAt', 'status']);
   applyExactFilters(options.where, query, ['queueId', 'status', 'type', 'batchId']);
+  if (!hasPlatformRole(user) && !query.queueId) {
+    const memberships = await models.ProjectMember.findAll({ where: { userId: user.id }, attributes: ['projectId'] });
+    const projects = await models.Project.findAll({ where: { id: memberships.map(m => m.projectId) }, attributes: ['id'] });
+    const queues = await models.JobQueue.findAll({ where: { projectId: projects.map(p => p.id) }, attributes: ['id'] });
+    options.where.queueId = queues.map(q => q.id);
+  }
   if (query.queueId) await assertQueueAccess(user, query.queueId);
   const result = await models.Job.findAndCountAll({
     ...options,

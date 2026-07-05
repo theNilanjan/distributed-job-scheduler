@@ -5,7 +5,7 @@ let socket;
 
 export function getSocket() {
   if (!socket) {
-    socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
+    socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5010', {
       autoConnect: false,
       auth: () => ({ token: getAccessToken() })
     });

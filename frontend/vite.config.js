@@ -8,7 +8,14 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port,
-      host: '0.0.0.0'
+      host: '0.0.0.0',
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5010',
+          changeOrigin: true,
+          secure: false
+        }
+      }
     }
   };
 });

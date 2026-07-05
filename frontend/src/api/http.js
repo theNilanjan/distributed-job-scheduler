@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../lib/authStorage';
+import { emitAppError } from '../lib/errorFeedback';
 
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   timeout: 15000
 });
 
@@ -20,6 +21,11 @@ http.interceptors.response.use(
     const original = error.config;
     const status = error.response?.status;
     if (status !== 401 || original?._retry || original?.url?.includes('/auth/refresh')) {
+      const message = error.response?.data?.message || error.message || 'Request failed';
+      emitAppError(message, {
+        title: 'Request failed',
+        action: 'Check the server status, refresh, or retry shortly.'
+      });
       return Promise.reject(error);
     }
 

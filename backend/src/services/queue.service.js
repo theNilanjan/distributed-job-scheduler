@@ -1,6 +1,6 @@
 import { fn, col } from 'sequelize';
 import { models } from '../models/index.js';
-import { assertProjectAccess, assertQueueAccess } from './access.service.js';
+import { assertProjectAccess, assertQueueAccess, hasPlatformRole } from './access.service.js';
 import { notFound } from '../utils/httpError.js';
 import { buildListOptions, applyExactFilters } from '../utils/query.js';
 import { paginatedResponse } from '../utils/pagination.js';
@@ -8,6 +8,10 @@ import { paginatedResponse } from '../utils/pagination.js';
 export async function listQueues(user, query) {
   const options = buildListOptions(query, ['name', 'slug'], ['createdAt', 'name', 'priority']);
   applyExactFilters(options.where, query, ['projectId', 'status']);
+  if (!hasPlatformRole(user) && !query.projectId) {
+    const memberships = await models.ProjectMember.findAll({ where: { userId: user.id }, attributes: ['projectId'] });
+    options.where.projectId = memberships.map((membership) => membership.projectId);
+  }
   if (query.projectId) await assertProjectAccess(user, query.projectId);
   const result = await models.JobQueue.findAndCountAll({
     ...options,

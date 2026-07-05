@@ -10,7 +10,7 @@ function assertPolicyWrite(user) {
   }
 }
 
-export async function listRetryPolicies(query) {
+export async function listRetryPolicies(user, query) {
   const options = buildListOptions(query, ['name'], ['createdAt', 'name', 'strategy']);
   applyExactFilters(options.where, query, ['strategy']);
   return paginatedResponse(await models.RetryPolicy.findAndCountAll(options), options);
