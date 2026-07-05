@@ -26,7 +26,12 @@ export async function registerUser({ name, email, password }) {
     }, { transaction });
 
     const role = await models.Role.findOne({ where: { name: 'VIEWER' }, transaction });
-    if (role) await user.addRole(role, { transaction });
+    if (role) {
+      await models.UserRole.create({
+        userId: user.id,
+        roleId: role.id
+      }, { transaction });
+    }
 
     const roles = role ? [role.name] : [];
     const refreshToken = signRefreshToken(tokenPayload(user, roles));
@@ -47,7 +52,11 @@ export async function registerUser({ name, email, password }) {
 export async function loginUser({ email, password }, context = {}) {
   const user = await models.User.findOne({
     where: { email },
-    include: [{ model: models.Role, as: 'roles', through: { attributes: [] } }]
+    include: [{
+      model: models.UserRole,
+      as: 'userRoles',
+      include: [{ model: models.Role, as: 'role' }]
+    }]
   });
 
   if (!user || user.status !== 'ACTIVE') throw unauthorized('Invalid email or password');
@@ -58,7 +67,7 @@ export async function loginUser({ email, password }, context = {}) {
   user.lastLoginAt = new Date();
   await user.save();
 
-  const roles = user.roles.map((role) => role.name);
+  const roles = user.userRoles ? user.userRoles.map((ur) => ur.role.name) : [];
   const refreshToken = signRefreshToken(tokenPayload(user, roles));
   await models.RefreshToken.create({
     userId: user.id,
@@ -82,7 +91,15 @@ export async function refreshTokens(refreshToken, context = {}) {
   return sequelize.transaction(async (transaction) => {
     const stored = await models.RefreshToken.findOne({
       where: { tokenHash },
-      include: [{ model: models.User, as: 'user', include: [{ model: models.Role, as: 'roles', through: { attributes: [] } }] }],
+      include: [{
+        model: models.User,
+        as: 'user',
+        include: [{
+          model: models.UserRole,
+          as: 'userRoles',
+          include: [{ model: models.Role, as: 'role' }]
+        }]
+      }],
       transaction,
       lock: transaction.LOCK.UPDATE
     });
@@ -95,7 +112,7 @@ export async function refreshTokens(refreshToken, context = {}) {
       throw unauthorized('Invalid refresh token');
     }
 
-    const roles = stored.user.roles.map((role) => role.name);
+    const roles = stored.user.userRoles ? stored.user.userRoles.map((ur) => ur.role.name) : [];
     const nextRefreshToken = signRefreshToken(tokenPayload(stored.user, roles));
     const nextHash = sha256(nextRefreshToken);
     stored.revokedAt = new Date();
