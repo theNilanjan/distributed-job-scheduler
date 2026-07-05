@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => {
           secure: false
         }
       }
+    },
+    preview: {
+      host: '0.0.0.0',
+      port: 80,
+      allowedHosts: ['all']
     }
   };
 });
