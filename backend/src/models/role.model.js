@@ -6,7 +6,7 @@ export function defineRole(sequelize, DataTypes) {
   }, { tableName: 'roles', timestamps: false });
 
   Role.associate = (models) => {
-    Role.belongsToMany(models.User, { through: 'user_roles', as: 'users', foreignKey: 'role_id', otherKey: 'user_id', timestamps: false });
+    Role.hasMany(models.UserRole, { as: 'userRoles', foreignKey: 'role_id' });
   };
 
   return Role;

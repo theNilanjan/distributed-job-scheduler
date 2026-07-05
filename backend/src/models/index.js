@@ -2,6 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 import { defineUser } from './user.model.js';
 import { defineRole } from './role.model.js';
+import { defineUserRole } from './userRole.model.js';
 import { defineOrganization } from './organization.model.js';
 import { defineOrganizationMember } from './organizationMember.model.js';
 import { defineProject } from './project.model.js';
@@ -24,6 +25,7 @@ import { defineRefreshToken } from './refreshToken.model.js';
 export const models = {
   User: defineUser(sequelize, DataTypes),
   Role: defineRole(sequelize, DataTypes),
+  UserRole: defineUserRole(sequelize, DataTypes),
   RefreshToken: defineRefreshToken(sequelize, DataTypes),
   Organization: defineOrganization(sequelize, DataTypes),
   OrganizationMember: defineOrganizationMember(sequelize, DataTypes),

@@ -9,7 +9,7 @@ export function defineUser(sequelize, DataTypes) {
   }, { tableName: 'users' });
 
   User.associate = (models) => {
-    User.belongsToMany(models.Role, { through: 'user_roles', as: 'roles', foreignKey: 'user_id', otherKey: 'role_id', timestamps: false });
+    User.hasMany(models.UserRole, { as: 'userRoles', foreignKey: 'user_id' });
     User.hasMany(models.RefreshToken, { as: 'refreshTokens', foreignKey: 'user_id' });
     User.hasMany(models.OrganizationMember, { as: 'organizationMemberships', foreignKey: 'user_id' });
     User.hasMany(models.ProjectMember, { as: 'projectMemberships', foreignKey: 'user_id' });

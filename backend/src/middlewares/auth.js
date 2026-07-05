@@ -10,7 +10,11 @@ export async function authenticate(req, _res, next) {
     const token = header.slice('Bearer '.length);
     const payload = verifyAccessToken(token);
     const user = await models.User.findByPk(payload.sub, {
-      include: [{ model: models.Role, as: 'roles', through: { attributes: [] } }]
+      include: [{
+        model: models.UserRole,
+        as: 'userRoles',
+        include: [{ model: models.Role, as: 'role' }]
+      }]
     });
 
     if (!user || user.status !== 'ACTIVE') throw unauthorized('Invalid or inactive user');
@@ -18,7 +22,7 @@ export async function authenticate(req, _res, next) {
     req.user = {
       id: user.id,
       email: user.email,
-      roles: user.roles ? user.roles.map((role) => role.name) : []
+      roles: user.userRoles ? user.userRoles.map((ur) => ur.role.name) : []
     };
     next();
   } catch (error) {
