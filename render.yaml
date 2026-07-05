@@ -1,0 +1,66 @@
+services:
+  # Backend API
+  - type: web
+    name: job-scheduler-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm run db:migrate && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5010
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: API_BASE_URL
+        value: https://job-scheduler-backend.onrender.com/api/v1
+      - key: FRONTEND_URL
+        value: https://job-scheduler-frontend.onrender.com
+
+  # Worker Process
+  - type: worker
+    name: job-scheduler-worker
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm run worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: WORKER_CONCURRENCY
+        value: 5
+      - key: WORKER_POLL_INTERVAL_MS
+        value: 2000
+
+  # Frontend
+  - type: web
+    name: job-scheduler-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://job-scheduler-backend.onrender.com/api/v1
+      - key: VITE_SOCKET_URL
+        value: https://job-scheduler-backend.onrender.com
